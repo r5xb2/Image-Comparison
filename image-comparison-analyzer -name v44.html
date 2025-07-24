@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>雙圖片分析比較工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .upload-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .upload-section {
+            flex: 1;
+            margin: 0 10px;
+            text-align: center;
+            padding: 20px;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+        }
+        .preview-image {
+            max-width: 300px;
+            max-height: 300px;
+            margin: 10px 0 5px 0;
+        }
+        .filename-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 0;
+            margin-bottom: 10px;
+            word-break: break-all;
+        }
+        .analysis-container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .analysis-section {
+            flex: 1;
+            margin: 0 10px;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+        .progress-bar {
+            width: 100%;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        .progress {
+            height: 20px;
+            background-color: #4CAF50;
+            border-radius: 10px;
+            transition: width 0.5s ease-in-out;
+        }
+        .score-label {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .comparison-result {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        #compareButton {
+            display: none;
+            margin: 20px auto;
+            padding: 15px 30px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>圖片分析比較工具 V4.3</h1>
+        
+        <div class="upload-container">
+            <div class="upload-section" id="uploadSection1">
+                <input type="file" id="imageInput1" accept="image/*" style="display: none;">
+                <button class="button" onclick="document.getElementById('imageInput1').click()">選擇圖片 1</button>
+                <p>或將圖片拖放到這裡</p>
+                <img id="previewImage1" class="preview-image" style="display: none;">
+                <p id="filename1" class="filename-label"></p>
+            </div>
+            
+            <div class="upload-section" id="uploadSection2">
+                <input type="file" id="imageInput2" accept="image/*" style="display: none;">
+                <button class="button" onclick="document.getElementById('imageInput2').click()">選擇圖片 2</button>
+                <p>或將圖片拖放到這裡</p>
+                <img id="previewImage2" class="preview-image" style="display: none;">
+                <p id="filename2" class="filename-label"></p>
+            </div>
+        </div>
+
+        <button id="compareButton" class="button">分析比較</button>
+
+        <div class="analysis-container">
+            <div class="analysis-section" id="analysis1">
+                <h2>圖片 1 分析結果</h2>
+                <div class="analysis-item">
+                    <div class="score-label">
+                        <span>清晰度</span>
+                        <span id="clarity1Score">-</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="clarity1Progress" class="progress"></div>
+                    </div>
+                </div>
+                <div class="analysis-item">
+                    <div class="score-label">
+                        <span>亮度平衡</span>
+                        <span id="brightness1Score">-</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="brightness1Progress" class="progress"></div>
+                    </div>
+                </div>
+                <div class="analysis-item">
+                    <div class="score-label">
+                        <span>對比度</span>
+                        <span id="contrast1Score">-</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="contrast1Progress" class="progress"></div>
+                    </div>
+                </div>
+                <div class="analysis-item">
+                    <div class="score-label">
+                        <span>整體評分</span>
+                        <span id="overall1Score">-</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="overall1Progress" class="progress"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="analysis-section" id="analysis2">
+                <h2>圖片 2 分析結果</h2>
+                <div class="analysis-item">
+                    <div class="score-label">
+                        <span>清晰度</span>
+                        <span id="clarity2Score">-</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="clarity2Progress" class="progress"></div>
+                    </div>
+                </div>
+                <div class="analysis-item">
+                    <div class="score-label">
+                        <span>亮度平衡</span>
+                        <span id="brightness2Score">-</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="brightness2Progress" class="progress"></div>
+                    </div>
+                </div>
+                <div class="analysis-item">
+                    <div class="score-label">
+                        <span>對比度</span>
+                        <span id="contrast2Score">-</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="contrast2Progress" class="progress"></div>
+                    </div>
+                </div>
+                <div class="analysis-item">
+                    <div class="score-label">
+                        <span>整體評分</span>
+                        <span id="overall2Score">-</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="overall2Progress" class="progress"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="comparison-result" id="comparisonResult"></div>
+    </div>
+
+    <script>
+        let image1Loaded = false;
+        let image2Loaded = false;
+
+
+// 在 setupImageInput 函數之前添加這些新函數 V4
+function detectWhitePortraitScene(data, width, height) {
+    let whitePixels = 0;
+    let totalPixels = data.length / 4;  // 因為每個像素有 RGBA 四個值
+    
+    for (let i = 0; i < data.length; i += 4) {
+        // 檢查是否為白色或接近白色的像素
+        if (data[i] > 200 && data[i + 1] > 200 && data[i + 2] > 200) {
+            whitePixels++;
+        }
+    }
+    
+    const whiteRatio = whitePixels / totalPixels;
+    return {
+        isWhiteBackground: whiteRatio > 0.4,
+        whiteRatio: whiteRatio
+    };
+}
+
+// 定義不同場景的權重
+const sceneWeights = {
+    white_portrait: {
+        clarity: 0.2,
+        brightness: 0.45,
+        contrast: 0.35
+    },
+    standard: {
+        clarity: 0.33,
+        brightness: 0.33,
+        contrast: 0.34
+    }
+};
+
+
+
+
+        function setupImageInput(inputId, previewId, uploadSectionId, imageNumber) {
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
+            const uploadSection = document.getElementById(uploadSectionId);
+
+            input.addEventListener('change', handleImageSelect);
+            setupDragAndDrop(uploadSection, input);
+
+            function handleImageSelect() {
+                const file = input.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                        // 顯示檔名
+                        document.getElementById(`filename${imageNumber}`).textContent = file.name;
+                        if (imageNumber === 1) {
+                            image1Loaded = true;
+                        } else {
+                            image2Loaded = true;
+                        }
+                        checkEnableCompare();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        }
+
+        function setupDragAndDrop(dropZone, input) {
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.style.borderColor = '#4CAF50';
+            });
+
+            dropZone.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                dropZone.style.borderColor = '#ccc';
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.style.borderColor = '#ccc';
+                const files = e.dataTransfer.files;
+                if (files.length > 0 && files[0].type.startsWith('image/')) {
+                    input.files = files;
+                    const event = new Event('change');
+                    input.dispatchEvent(event);
+                }
+            });
+        }
+
+        function checkEnableCompare() {
+            const compareButton = document.getElementById('compareButton');
+            if (image1Loaded && image2Loaded) {
+                compareButton.style.display = 'block';
+            }
+        }
+
+        // 輔助函數用於清晰度計算 v3.5
+        function calculateLaplacian(data, width, height) {
+            const laplacianKernel = [
+                [0, 1, 0],
+                [1, -4, 1],
+                [0, 1, 0]
+            ];
+            const result = new Float32Array(width * height);
+            
+            for (let y = 1; y < height - 1; y++) {
+                for (let x = 1; x < width - 1; x++) {
+                    let sum = 0;
+                    // 對每個像素應用拉普拉斯算子
+                    for (let ky = -1; ky <= 1; ky++) {
+                        for (let kx = -1; kx <= 1; kx++) {
+                            const idx = ((y + ky) * width + (x + kx)) * 4;
+                            const kernelValue = laplacianKernel[ky + 1][kx + 1];
+                            sum += data[idx] * kernelValue;
+                        }
+                    }
+                    result[y * width + x] = Math.abs(sum);
+                }
+            }
+            return result;
+        }
+
+        function calculateEdges(data, width, height) {
+            const sobelX = [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]];
+            const sobelY = [[-1, -2, -1], [0, 0, 0], [1, 2, 1]];
+            const edges = new Float32Array(width * height);
+            
+            for (let y = 1; y < height - 1; y++) {
+                for (let x = 1; x < width - 1; x++) {
+                    let gx = 0, gy = 0;
+                    
+                    for (let ky = -1; ky <= 1; ky++) {
+                        for (let kx = -1; kx <= 1; kx++) {
+                            const idx = ((y + ky) * width + (x + kx)) * 4;
+                            gx += data[idx] * sobelX[ky + 1][kx + 1];
+                            gy += data[idx] * sobelY[ky + 1][kx + 1];
+                        }
+                    }
+                    
+                    edges[y * width + x] = Math.sqrt(gx * gx + gy * gy);
+                }
+            }
+            return edges;
+        }
+
+// V43
+function calculateClarityScore(data, width, height, sceneInfo) {
+    // 一般場景的計算保持不變
+    if (!sceneInfo.isWhiteBackground) {
+        const laplacianValues = calculateLaplacian(data, width, height);
+        const edges = calculateEdges(data, width, height);
+        
+        const avgLaplacian = laplacianValues.reduce((a, b) => a + b, 0) / laplacianValues.length;
+        const blurScore = Math.min(100, (avgLaplacian / 2.5) * 100);
+        
+        const edgePixels = edges.filter(val => val > 30).length;
+        const edgeRatio = edgePixels / (width * height);
+        
+        let edgeScore;
+        if (edgeRatio > 0.05 && edgeRatio < 0.3) {
+            edgeScore = 100 - Math.abs((edgeRatio - 0.15) * 500);
+        } else {
+            edgeScore = 50 - Math.abs((edgeRatio - 0.15) * 250);
+        }
+
+    // 在這裡加入除錯資訊 V43
+    console.log('Clarity calculation (Standard):', {
+        isWhiteBackground: false,
+        blurScore: blurScore,
+        edgeScore: edgeScore,
+        finalScore: blurScore * 0.4 + edgeScore * 0.6
+
+    });
+        
+        return Math.max(0, Math.min(100,
+            blurScore * 0.4 + edgeScore * 0.6
+
+        ));
+    }
+ 
+
+    
+    // 白色背景場景的特殊計算
+    else {
+        const laplacianValues = calculateLaplacian(data, width, height);
+        const edges = calculateEdges(data, width, height);
+        
+        const avgLaplacian = laplacianValues.reduce((a, b) => a + b, 0) / laplacianValues.length;
+        const blurScore = Math.min(100, (avgLaplacian / 3.2) * 100);
+        
+        const edgePixels = edges.filter(val => val > 35).length;
+        const edgeRatio = edgePixels / (width * height);
+        
+        let edgeScore = edgeRatio > 0.002 && edgeRatio < 0.12 ? 
+            100 - Math.abs((edgeRatio - 0.06) * 1000) :
+            50 - Math.abs((edgeRatio - 0.06) * 500);
+
+        // 在這裡加入除錯資訊 V44
+        console.log('Clarity calculation (White Background):', {
+            isWhiteBackground: true,
+            avgLaplacian: avgLaplacian,
+            edgeRatio: edgeRatio,
+            blurScore: blurScore,
+            edgeScore: edgeScore,
+            finalScore: blurScore * 0.4 + edgeScore * 0.6
+        });
+
+           
+        return Math.max(0, Math.min(100,
+            blurScore * 0.4 + edgeScore * 0.6
+        ));
+    }
+}
+
+
+
+
+
+
+function analyzeImage(imageElement) {
+    return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = imageElement.naturalWidth;
+        canvas.height = imageElement.naturalHeight;
+        ctx.drawImage(imageElement, 0, 0);
+        
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+
+        // 檢測場景類型 v4
+        const sceneInfo = detectWhitePortraitScene(data, canvas.width, canvas.height);
+        
+        // 改進的亮度計算
+        let totalBrightness = 0;
+        let brightnessValues = [];
+        let overExposedPixels = 0;
+        let underExposedPixels = 0;
+        
+        for (let i = 0; i < data.length; i += 4) {
+            // 使用更準確的亮度計算公式
+            const brightness = (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114) / 255;
+            totalBrightness += brightness;
+            brightnessValues.push(brightness);
+            
+            // 計算過度曝光和曝光不足的像素
+            if (brightness > 0.95) overExposedPixels++;
+            if (brightness < 0.05) underExposedPixels++;
+        }
+        
+        const avgBrightness = totalBrightness / (data.length / 4);
+        const totalPixels = data.length / 4;
+        
+        // 計算亮度平衡分數
+        const exposureScore = 100 - (
+            (overExposedPixels / totalPixels * 100) * 1.5 + // 過度曝光權重更大
+            (underExposedPixels / totalPixels * 100)
+        );
+        
+        // 改進的對比度計算
+        const brightnessStdDev = Math.sqrt(
+            brightnessValues.reduce((sum, val) => sum + Math.pow(val - avgBrightness, 2), 0) / brightnessValues.length
+        );
+        
+        // 對比度評分，使用更合理的範圍
+        const contrastScore = Math.min(100, 
+            (brightnessStdDev > 0.15 && brightnessStdDev < 0.4) ? 
+            100 - Math.abs((brightnessStdDev - 0.25) * 400) : 
+            50 - Math.abs((brightnessStdDev - 0.25) * 200)
+        );
+        
+// 使用新的清晰度計算函數 V43
+const clarityScore = calculateClarityScore(data, canvas.width, canvas.height, sceneInfo);
+
+        
+        // 將所有分數標準化到0-100範圍
+        const normalizedBrightness = Math.max(0, Math.min(100, exposureScore));
+        const normalizedContrast = Math.max(0, Math.min(100, contrastScore));
+        const normalizedClarity = Math.max(0, Math.min(100, clarityScore));
+        
+        resolve({
+            clarity: normalizedClarity,
+            brightness: normalizedBrightness,
+            contrast: normalizedContrast,
+            sceneInfo: sceneInfo
+        });
+    });
+}
+        function updateScore(type, number, score) {
+            document.getElementById(`${type}${number}Score`).textContent = `${Math.round(score)}%`;
+            document.getElementById(`${type}${number}Progress`).style.width = `${score}%`;
+        }
+
+        document.getElementById('compareButton').addEventListener('click', async () => {
+            const img1 = document.getElementById('previewImage1');
+            const img2 = document.getElementById('previewImage2');
+            
+            const results1 = await analyzeImage(img1);
+            const results2 = await analyzeImage(img2);
+
+    // 在這裡加入除錯資訊v41
+    console.log('Scene detection 1:', results1.sceneInfo);
+    console.log('Scene detection 2:', results2.sceneInfo);
+ 
+
+   // 根據場景選擇權重 V4
+    const weights = results1.sceneInfo.isWhiteBackground ? 
+        sceneWeights.white_portrait : sceneWeights.standard;
+
+    // 加入權重資訊 v41
+    console.log('Applied weights:', weights);
+
+    // 計算加權分數
+    const overall1 = 
+        results1.clarity * weights.clarity + 
+        results1.brightness * weights.brightness + 
+        results1.contrast * weights.contrast;
+    
+    const overall2 = 
+        results2.clarity * weights.clarity + 
+        results2.brightness * weights.brightness + 
+        results2.contrast * weights.contrast;
+
+    // 更新分數顯示
+    updateScore('clarity', 1, results1.clarity);
+    updateScore('brightness', 1, results1.brightness);
+    updateScore('contrast', 1, results1.contrast);
+    updateScore('overall', 1, overall1);
+
+    updateScore('clarity', 2, results2.clarity);
+    updateScore('brightness', 2, results2.brightness);
+    updateScore('contrast', 2, results2.contrast);
+    updateScore('overall', 2, overall2);
+
+    // 更新比較結果顯示
+    const comparisonResult = document.getElementById('comparisonResult');
+    comparisonResult.innerHTML = `
+        <h3>比較結果</h3>
+        ${results1.sceneInfo.isWhiteBackground ? `
+            <div class="scene-info" style="background-color: #f8f9fa; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+                <p>📷 檢測到白色背景人像場景（白色比例：${(results1.sceneInfo.whiteRatio * 100).toFixed(1)}%）</p>
+                <p>已自動調整評分權重：</p>
+                <ul>
+                    <li>清晰度權重：${(weights.clarity * 100).toFixed()}%</li>
+                    <li>亮度權重：${(weights.brightness * 100).toFixed()}%</li>
+                    <li>對比度權重：${(weights.contrast * 100).toFixed()}%</li>
+                </ul>
+            </div>
+        ` : ''}
+        <p>兩張圖片的整體評分差異為 ${Math.abs(overall1 - overall2).toFixed(1)}%</p>
+        <p>${overall1 > overall2 ? '圖片 1' : overall1 < overall2 ? '圖片 2' : '兩張圖片'}${overall1 !== overall2 ? ' 的整體表現較佳' : ' 的整體表現相當'}</p>
+        <p>主要差異：</p>
+        <ul>
+            <li>清晰度差異：${Math.abs(results1.clarity - results2.clarity).toFixed(1)}%</li>
+            <li>亮度差異：${Math.abs(results1.brightness - results2.brightness).toFixed(1)}%</li>
+            <li>對比度差異：${Math.abs(results1.contrast - results2.contrast).toFixed(1)}%</li>
+        </ul>
+    `;
+});
+
+        // 初始化兩個圖片上傳區域
+        setupImageInput('imageInput1', 'previewImage1', 'uploadSection1', 1);
+        setupImageInput('imageInput2', 'previewImage2', 'uploadSection2', 2);
+    </script>
+</body>
+</html>
